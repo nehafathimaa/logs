@@ -1,0 +1,53 @@
+name: Java CI
+
+on:
+  pull_request:
+    paths:
+      - '**/*.java'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+      
+      - name: Build and Test
+        run: |
+          # Replace these with your actual build and test commands
+          ./gradlew build
+          ./gradlew test || true
+          
+      - name: Check test status
+        if: ${{ failure() }}
+        run: |
+          echo "Test failed! Posting error comment..."
+          COMMENT="Test failed. Please check the logs for more details."
+          echo "$COMMENT"
+          echo "::set-output name=comment::$COMMENT"
+          
+      - name: Post Comment
+        if: steps.check_test_status.outputs.comment
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const comment = `
+            ## Test Failure
+            
+            ${process.env.COMMENT}
+            
+            Workflow: [\`${process.env.GITHUB_WORKFLOW}\`](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID})
+            `
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            })
