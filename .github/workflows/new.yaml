@@ -21,7 +21,12 @@ jobs:
       - name: Build and Test
         run: |
           # Replace these with your actual build and test commands
-          ./gradlew build
+          ./gradlew build  > log.txt 2>&1; echo $?
+          printf "\n\n\n"
+          ls
+          printf "\n\n\n"
+          ls -altr
+          printf "\n\n\n"
           ./gradlew test || true
           
       - name: Check test status
