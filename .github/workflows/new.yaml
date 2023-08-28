@@ -1,9 +1,9 @@
 name: Java CI
 
-on:
-  pull_request:
-    paths:
-      - '**/*.java'
+on: workflow_dispatch
+
+  
+    
 
 jobs:
   build-and-test:
